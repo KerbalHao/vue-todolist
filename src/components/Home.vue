@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <v-header class='header' @change-tag='onChangeTag' :num='num'></v-header>
+    <v-header class='header' @change-tag='onChangeTag' :num='num || 0'></v-header>
 
     <div class="main">
       <!-- top of the list -->
@@ -18,6 +18,7 @@
             icon="cubeic-ok" 
             class='button' 
             @click='completeAll'
+            :disabled='!this.tasks.length'
           >批量完成</cube-button>
           <cube-button 
           :inline="true"  
@@ -25,6 +26,7 @@
           icon="cubeic-delete"
           class='button' 
           @click='deleteAll'
+          :disabled='!this.tasks.length'
           >批量删除</cube-button>
         </div>
       </div>
@@ -36,8 +38,8 @@
           :options='options'>
 
           <li 
-          v-for="task in tasks" 
-          :key="task.id" 
+          v-for="(task,index) in tasks" 
+          :key="index" 
           class='task'
           @click='tapTask(task)' 
           :class="{'current': task.current,'done': task.done, 'fail': task.fail}"
@@ -50,51 +52,57 @@
           <div class='content'>
             <div class='title'>
               {{task.title}}
-              <span class='signal' v-show='task.done || task.fail'>
-                {{task.done ? '（完成！）' : task.fail ? '（失败！）' : ''}}
-              </span>
+              <div class="flag" >
+                <div 
+                  :class="(task.start ? 'pause' : 'start')" 
+                  v-show='!task.done && !task.fail' 
+                  @click.stop='manipulateTask(task)'
+                ></div>
+
+                <div class="sperate" v-show='!task.done && !task.fail'></div>
+
+                <div class="stop" v-show='!task.done && !task.fail' @click.stop='stopTask(task)'></div>
+
+                <div :class="{'done': task.done,'fail':task.fail}" v-show='task.fail || task.done'>
+                  <i :class="'cubeic-' + (task.fail ? 'close' : 'ok')" ></i>
+                </div>
+              </div>
             </div>
-            <!-- <i :class="{'cubeic-close': !task.done, 'cubeic-ok': task.done}" class='signal' v-show="task.done || task.fail"></i> -->
-            <span class="type">
-              {{task.type}}
-            </span>
 
             <transition name='time'>
               <div class="detail" v-show='task.detail'>
-                <span class="startTime">开始时间</span><br>
-                <span class="expectTime">预计完成时间</span><br>
-                <span class="leftTime">剩余时间</span>
+                <span class="startTime">开始时间: {{task.start || task.startTime ? task.startTime : '未开始'}}</span><br>
+                <span class="leftTime">剩余时间: {{task.timing || '00: 00'}} / {{task.lastTime | toMinute}}</span>
+
+                <div class="buttons">
+                  <cube-button 
+                    :inline="true"  
+                    :primary="true"
+                    icon="cubeic-ok" 
+                    class='button' 
+                    @click.stop='completeTask(task)'
+                  >{{task.fail || task.done ? '重置' : '完成'}}</cube-button>
+                    <cube-button 
+                      :inline="true"  
+                      :primary="true"
+                      icon="cubeic-edit" 
+                      class='button'
+                      @click.stop='editTask(task)'
+                    >编辑
+                      </cube-button>
+                    <cube-button 
+                      :inline="true"  
+                      :primary="true"
+                      icon="cubeic-delete"
+                      class='button' 
+                      @click.stop='deleteTask(task)'
+                    >删除</cube-button>
+                </div>
               </div>
+                
             </transition>
           </div>
 
-          <transition name='button'>
-            <div class="buttons"  v-show='task.detail'>
-              <cube-button 
-                :inline="true"  
-                :primary="true"
-                icon="cubeic-ok" 
-                class='button' 
-                @click='completeTask(task)'>{{task.done ? '重置' : '完成'}}</cube-button>
-                <cube-button 
-                  :inline="true"  
-                  :primary="true"
-                  icon="cubeic-edit" 
-                  class='button'
-                  @click='editTask'>
-                    <router-link :to="'/detail/' + task"  class='router'>
-                      编辑
-                    </router-link>
-                  </cube-button>
-              
-              <cube-button 
-                :inline="true"  
-                :primary="true"
-                icon="cubeic-delete"
-                class='button' 
-                @click='deleteTask(task)'>删除</cube-button>
-            </div>
-          </transition>
 
         </li>
         </cube-scroll>
@@ -111,6 +119,8 @@
 
 <script>
 import VHeader from '@/components/V-header'
+// import { setInterval, clearTimeout, clearInterval, clearImmediate } from 'timers';
+let moment = require('moment')
 export default {
   name: 'Home',
   data() {
@@ -119,62 +129,16 @@ export default {
         click: true,
         directionLockThreshold: 0
       },
-      tasks: [
-        {
-          title: 'asdasdasda',
-          type: 'work',
-          detail: false,
-          check: false,
-          id: 0,
-          current: false,
-          done: false,
-          fail:false
-        },
-        {
-          title: 'qwewqrwqe',
-          type: 'work',
-          detail: false,
-          check: false,
-          id: 1,
-          current: false,
-          done: false,
-          fail:false
-        },
-        {
-          title: 'zxcxvxva',
-          type: 'work',
-          detail: false,
-          check: false,
-          id: 2,
-          current: false,
-          done: false,
-          fail:true
-        },
-        {
-          title: 'zxcxvxva',
-          type: 'work',
-          detail: false,
-          check: false,
-          id: 3,
-          current: false,
-          done: true
-        },
-        {
-          title: 'zxcxvxva',
-          type: 'work',
-          detail: false,
-          check: false,
-          id: 4,
-          current: false,
-          done: false
-        }
-      ],
+      tasks: JSON.parse(localStorage.getItem('tasks')) || [],
       tag: 'all'
     }
   },
   computed: {
     allCheck: {
       get() {
+        if (this.tasks.length === 0) {
+          return false
+        }
         return this.tasks.every(task => {
           return task.current
         })
@@ -199,10 +163,8 @@ export default {
       }
     }
   },
-  created() {
-    this.tasks.forEach( task => {
-      task.tag = 'all'
-    })
+  beforeDestroy() {
+    localStorage.setItem('tasks', JSON.stringify(this.tasks))
   },
   methods: {
     onChangeTag(tag) {
@@ -238,7 +200,6 @@ export default {
           } else {
             this.tasks[i].current = false
             this.tasks[i].detail = false
-
           }
         }
     },
@@ -253,9 +214,10 @@ export default {
       this.tasks.forEach( task => {
         if (task.current) {
           task.done = true
-            if (task.fail) {
-              task.done = false
-            }
+          task.startTime += '(完成)'
+          if (task.fail) {
+            task.done = false
+          }
         }
       })
     },
@@ -265,23 +227,91 @@ export default {
           this.tasks.splice(i, 1)
         }
       }
+      localStorage.setItem('tasks', JSON.stringify(this.tasks))
       this.allCheck = false
     },
-    // to be fixed
     completeTask(task) {
-      task.done = !task.done
+      clearInterval(task.timer)
+      if (!task.done) {
+        task.startTime += '(完成)'
+        task.done = true
+      } else if (task.done) {
+        // 重置
+        this.reset(task)
+      } if (task.fail) {
+        this.reset(task)
+      }
     },
-    editTask() {},
+    editTask(task) {
+      task.start = false
+      clearInterval(task.timer)
+      this.$router.push({
+        name: 'Detail',
+        params: {
+          taskId: task.id
+        }
+      })
+    },
     deleteTask(task) {
       for (let i = 0; i < this.tasks.length; i++) {
-        console.log(1)
         if (task === this.tasks[i]) {
-        console.log(2)
-
           this.tasks.splice(i, 1)
         }
       }
+      localStorage.setItem('tasks', JSON.stringify(this.tasks))
+    },
+    manipulateTask(task) {
+      let startTime = moment().format('MM-DD HH:mm:ss')
+      if (!task.start) {
+        task.start = true
+        task.startTime = startTime
+        task.timer = setInterval(()=> {
+          task.minute = Math.floor(task.counter / 60)
+          task.second = task.counter % 60
+          task.timing = `${task.minute >= 10 ? task.minute:'0' + task.minute}: ${task.second >= 10 ? task.second : '0' + task.second}` 
+          task.counter ++
+          this.setFail(task)
+        }, 1000)
+      } else {
+        task.startTime = startTime + '(暂停中)'
+        clearInterval(task.timer)
+        task.start = false
+      }
+    },
+    stopTask(task) {
+      clearInterval(task.timer)
+      this.reset(task)
+    },
+    reset(task) {
+      task.done = false
+      task.fail = false
+      task.start = false
+      task.startTime = ''
+      task.timing = ''
+      task.counter = task.minute = task.second = 0
+    },
+    setFail(task) {
+      let timing = (task.minute * 60 + task.second) / 60
+      if (task.lastTime !== '' && timing > task.lastTime) {
+        task.fail = true
+        task.startTime = '(失败)'
+      }
     }
+  },
+  filters: {
+    toMinute(num) {
+      let number = Number(num),
+        formating = number * 60,
+        second = 0, minute = 0
+      if (formating % 60 !== 0) {
+        second = formating % 60
+        minute = Math.floor(number)
+      } else {
+        minute = formating / 60
+      }
+      return `${minute >= 10 ? minute:'0' + minute}: ${second >= 10 ? second : '0' + second}`
+    },
+    
   },
   components: {
     VHeader
@@ -292,7 +322,12 @@ export default {
 <style lang='stylus' scoped>
   .home
     .main
-      margin 100px 10px 0px 10px
+      // margin 100px 10px 10px 10px
+      width 95%
+      height 100%
+      position fixed
+      top 100px
+      bottom 50px
       .manipulation
         margin-bottom 20px
         display flex
@@ -300,56 +335,85 @@ export default {
         border-bottom 1px solid orange
         padding-bottom 2px
         font-size 16px
+        .checkBox
+          padding-left 10px
         .button
           margin-left 10px
           font-size 10px
           padding 5px
       .scroll-list-wrap
-        height 400px
+        overflow hidden
+        height 65%
+        // height 450px
         text-align left
         li
           display flex
           box-sizing border-box
           margin-bottom 10px
-          padding-top 10px
           padding-left 10px
-          vertical-align center
-          // .dot
-          //   margin auto 10px
-          //   width 12px
-          //   height 12px
-          //   border-radius 50%
-          //   background #FFC85E          
+          padding-top 10px
+          vertical-align center    
           .content
             margin-left 10px
+            width 100%
             display flex
             flex-direction column
             .title
               font-size 24px
-            .type
-              font-size 12px
-              color #666666
+              .flag 
+                float right
+                background #Fc9153
+                margin-right 10px
+                display inline-flex
+                .sperate
+                  background #ccc
+                  width 2px
+                .start 
+                  box-sizing border-box
+                    display inline-block
+                  // width 20px
+                  // height 20px
+                  margin 0 10px
+                  border 10px solid #Fc9153
+                  background #Fc9153
+                  border-left 10px solid white
+                  border-right none
+                .stop 
+                  box-sizing border-box
+                  // width 20px
+                  // height 20px
+                  margin 4px 9px
+                  border 6px solid white
+                  background #Fc9153
+                .pause
+                  box-sizing border-box
+                  width 10px
+                  height 16px
+                  margin 2px 10px
+                  // border 10px solid #Fc915
+                  background #Fc9153
+                  border-left 3px solid white
+                  border-right 3px solid white
+
           
         .current 
           border-top 1px solid blue
           border-bottom 1px solid blue
           background #FFFFFF
-          .button-enter-active, .button-leave-active 
-            transition all 1.5s ease
-          .button-enter, .button-leav
-            opacity 0
-            transform translateX(100%)
-          .buttons
-            flex 1
+          .detail
+            margin-top 10px
             display flex
-            justify-content flex-end
-            height 20px
-            // margin-top 20px
-            .button
-              font-size 8px
-              margin-right 2px
-              padding 0 10px 
-              .router
+            width 100%
+            font-size 16px
+            flex-direction column
+            justify-content space-between
+            .buttons
+              margin-top 10px
+              // width 100%
+              display flex
+              margin-right 30px
+              justify-content space-between
+              .button
                 color white
           .time-enter-active, .time-leave-active 
             transition all .5s ease
@@ -359,7 +423,7 @@ export default {
           background #FFCC99
         .fail
           background #663333
-          color white
+          color red
           .title
             color red
           .type 
@@ -371,7 +435,7 @@ export default {
       background #ccc
       width 100%
       position fixed 
-      bottom 10px
+      bottom 0
       font-size 60px
       left 50%
       transform translateX(-50%)

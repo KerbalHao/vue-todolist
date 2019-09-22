@@ -19,11 +19,11 @@
     </div>
     <div class="detailUpper" v-else-if="page === DETAIL">
       <div class="left">
-        <i class="cubeic-back"></i>
+        <i class="cubeic-back" @click='back'></i>
       </div>
       <div class="right">
-        <i class="cubeic-delete"></i>
-        <i class="cubeic-ok"></i>
+        <i class="cubeic-delete" @click='deleteCurrent'></i>
+        <i class="cubeic-ok" @click='saveEdit'></i>
       </div>
     </div>
     <div class="searchUpper" v-else-if='page === SEARCH'>
@@ -73,6 +73,15 @@ export default {
           }
         }
       }
+    },
+    back() {
+      this.$router.back()
+    },
+    deleteCurrent() {
+      this.$emit('deleteIt')
+    },
+    saveEdit() {
+      this.$emit('save')
     }
   },
   components: {
@@ -87,9 +96,11 @@ export default {
     // margin-top 20px
     padding-top 20px
     height 75px
-    position fixed
+    position relative
     width 100%
+    overflow hidden
     top 0
+    z-index 9899
     .homeUpper
       display flex
       align-content center

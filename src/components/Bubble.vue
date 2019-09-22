@@ -1,5 +1,5 @@
 <template>
-  <div class="bubble" v-show='num !== 0'>{{num}}</div>
+  <div class="bubble">{{num}}</div>
 </template>
 
 <script>

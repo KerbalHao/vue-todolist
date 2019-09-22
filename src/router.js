@@ -8,12 +8,16 @@ export default new Router({
   base: process.env.BASE_URL,
   routes: [
     {
+      path: '/',
+      redirect: '/home'
+    },
+    {
       path: '/home',
       name: 'Home',
       component: () => import('@/components/Home.vue')
     },
     {
-      path: '/detail/:id',
+      path: '/detail/',
       name: 'Detail',
       component: () => import('@/components/Detail.vue'),
       props: true

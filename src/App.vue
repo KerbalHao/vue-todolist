@@ -13,15 +13,18 @@
 // }
 </script>
 <style lang="stylus">
-html,body 
-  background #ccc
+@media screen and (max-width: 900px)
+  html,body 
+    background #ccc
+    height 100%
+    font-size 24px
 
-#app
-  font-family 'Avenir', Helvetica, Arial, sans-serif
-  -webkit-font-smoothing antialiased
-  -moz-osx-font-smoothing grayscale
-  text-align center
-  color #2c3e50
+  #app
+    font-family 'Avenir', Helvetica, Arial, sans-serif
+    -webkit-font-smoothing antialiased
+    -moz-osx-font-smoothing grayscale
+    text-align center
+    color #2c3e50
 
 
 </style>
