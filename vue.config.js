@@ -14,5 +14,6 @@ module.exports = {
       postCompile: true,
       theme: true
     }
-  }
+  },
+  publicPath: 'tags/vue-todo/'
 }

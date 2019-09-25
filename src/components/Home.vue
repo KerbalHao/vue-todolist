@@ -42,7 +42,7 @@
           :key="index" 
           class='task'
           @click='tapTask(task)' 
-          :class="{'current': task.current,'done': task.done, 'fail': task.fail}"
+          :class="{'current': task.detail,'done': task.done, 'fail': task.fail}"
           v-show='tag === task.tag'
         >
           <div class='dot' @click.stop='toggle(task)'>
@@ -119,8 +119,8 @@
 
 <script>
 import VHeader from '@/components/V-header'
-// import { setInterval, clearTimeout, clearInterval, clearImmediate } from 'timers';
 let moment = require('moment')
+
 export default {
   name: 'Home',
   data() {
@@ -164,6 +164,10 @@ export default {
     }
   },
   beforeDestroy() {
+    this.tasks.forEach(task => {
+      task.start = true
+      manipulateTask(task)
+    })
     localStorage.setItem('tasks', JSON.stringify(this.tasks))
   },
   methods: {
@@ -195,17 +199,14 @@ export default {
     tapTask(task) {
         for (let i = 0; i < this.tasks.length; i ++) {
           if (this.tasks[i] === task) {
-            task.current = !task.current
             task.detail = !task.detail
           } else {
-            this.tasks[i].current = false
             this.tasks[i].detail = false
           }
         }
     },
     toggle(task) {
       task.current = !task.current
-      task.detail = false
     },
     toggleAll() {
       this.allCheck = !this.allCheck
@@ -220,6 +221,7 @@ export default {
           }
         }
       })
+      localStorage.setItem('tasks', JSON.stringify(this.tasks))
     },
     deleteAll() {
       for (let i = this.tasks.length - 1; i >= 0; i--) {
@@ -241,6 +243,7 @@ export default {
       } if (task.fail) {
         this.reset(task)
       }
+      localStorage.setItem('tasks', JSON.stringify(this.tasks))
     },
     editTask(task) {
       task.start = false
@@ -277,10 +280,12 @@ export default {
         clearInterval(task.timer)
         task.start = false
       }
+      localStorage.setItem('tasks', JSON.stringify(this.tasks))
     },
     stopTask(task) {
       clearInterval(task.timer)
       this.reset(task)
+      localStorage.setItem('tasks', JSON.stringify(this.tasks))
     },
     reset(task) {
       task.done = false
