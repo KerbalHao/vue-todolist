@@ -164,9 +164,11 @@ export default {
     }
   },
   beforeDestroy() {
+    console.log(1)
     this.tasks.forEach(task => {
-      task.start = true
-      manipulateTask(task)
+      if (task.start === true) {
+        this.manipulateTask(task)
+      }
     })
     localStorage.setItem('tasks', JSON.stringify(this.tasks))
   },
