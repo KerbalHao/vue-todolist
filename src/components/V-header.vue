@@ -26,11 +26,11 @@
         <i class="cubeic-ok" @click='saveEdit'></i>
       </div>
     </div>
-    <div class="searchUpper" v-else-if='page === SEARCH'>
+    <!-- <div class="searchUpper" v-else-if='page === SEARCH'>
         <i class="cubeic-search"></i>
         <span>Search</span>
-    </div>
-    <split :second="page === 'home'"></split>
+    </div>-->
+    <split :second="page === 'home'" :num='num' :finished='finished'></split>
   </div>
 </template>
 
@@ -49,6 +49,10 @@ export default {
       default: HOME
     },
     num: {
+      type: Number,
+      default: 0
+    },
+    finished: {
       type: Number,
       default: 0
     }

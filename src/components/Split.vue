@@ -2,7 +2,7 @@
   <div class="split">
     <div class='left' :class="{'second': second}"></div>
     <div class='right'>
-      <span>0/3 TODAY</span>
+      <span>{{finished}}/{{num}} TODAY</span>
     </div>
   </div>
 </template>
@@ -13,6 +13,14 @@ export default {
     second: {
       type: Boolean,
       default: false
+    },
+    num: {
+      type: Number,
+      default: 0
+    },
+    finished: {
+      type: Number,
+      default: 0
     }
   }
 }

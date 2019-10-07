@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <v-header class='header' @change-tag='onChangeTag' :num='num || 0'></v-header>
+    <v-header class='header' @change-tag='onChangeTag' :num='num || 0' :finished='finished'></v-header>
 
     <div class="main">
       <!-- top of the list -->
@@ -161,6 +161,11 @@ export default {
           return task.done
         }).length
       }
+    },
+    finished() {
+      return this.tasks.filter(task => {
+        return task.done
+      }).length
     }
   },
   beforeDestroy() {
@@ -215,7 +220,7 @@ export default {
     },
     completeAll() {
       this.tasks.forEach( task => {
-        if (task.current) {
+        if (task.current && !task.done) {
           task.done = true
           task.startTime += '(完成)'
           if (task.fail) {
