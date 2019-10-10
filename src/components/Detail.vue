@@ -63,11 +63,13 @@ export default {
   methods: {
     deleteThis() {
       if (this.tasks.length > 0) {
-        let id = this.$route.params.taskId
-        let index = this.tasks.findIndex(task => {
-          return task.id === id
-        })
+        if (this.$route.params.taskId) {
+          let id = this.$route.params.taskId
+          let index = this.tasks.findIndex(task => {
+            return task.id === id
+          })
         this.tasks.splice(index, 1)
+        }
       }
       this.saveTasks()
     },
@@ -105,9 +107,13 @@ export default {
       justify-content  space-between
       background white
       padding 10px
-    input 
-      background white
-      border 1px solid orange
-    textarea
-      min-width 70%
+      input 
+        flex 1
+        margin-left 30px
+        background white
+        border 1px solid orange
+      textarea
+        flex 1
+        margin-left 30px
+        min-width 70%
 </style>

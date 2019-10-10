@@ -8,8 +8,9 @@ import {
   Style,
   Button,
   Scroll,
+  Popup
 } from 'cube-ui'
 Vue.use(Button)
-
+Vue.use(Popup)
 Vue.use(Scroll)
 

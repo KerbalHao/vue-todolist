@@ -37,13 +37,13 @@
           :data="tasks"
           :options='options'>
 
-          <li 
-          v-for="(task,index) in tasks" 
-          :key="index" 
-          class='task'
-          @click='tapTask(task)' 
-          :class="{'current': task.detail,'done': task.done, 'fail': task.fail}"
-          v-show='tag === task.tag'
+        <li 
+        v-for="(task,index) in tasks" 
+        :key="index" 
+        class='task'
+        @click='tapTask(task)' 
+        :class="{'current': task.detail,'done': task.done, 'fail': task.fail}"
+        v-show='tag === task.tag'
         >
           <div class='dot' @click.stop='toggle(task)'>
             <i :class="{'cubeic-square-border': !task.current, 'cubeic-square-right': task.current}"></i>
@@ -70,7 +70,7 @@
             </div>
 
             <transition name='time'>
-              <div class="detail" v-show='task.detail'>
+              <div class="detail" v-show='task.detail' >
                 <span class="startTime">开始时间: {{task.start || task.startTime ? task.startTime : '未开始'}}</span><br>
                 <span class="leftTime">剩余时间: {{task.timing || '00: 00'}} / {{task.lastTime | toMinute}}</span>
 
@@ -169,7 +169,6 @@ export default {
     }
   },
   beforeDestroy() {
-    console.log(1)
     this.tasks.forEach(task => {
       if (task.start === true) {
         this.manipulateTask(task)
@@ -222,7 +221,7 @@ export default {
       this.tasks.forEach( task => {
         if (task.current && !task.done) {
           task.done = true
-          task.startTime += '(完成)'
+          task.startTime += '(finished)'
           if (task.fail) {
             task.done = false
           }
@@ -242,7 +241,7 @@ export default {
     completeTask(task) {
       clearInterval(task.timer)
       if (!task.done) {
-        task.startTime += '(完成)'
+        task.startTime += '(finished)'
         task.done = true
       } else if (task.done) {
         // 重置
@@ -271,10 +270,15 @@ export default {
       localStorage.setItem('tasks', JSON.stringify(this.tasks))
     },
     manipulateTask(task) {
-      let startTime = moment().format('MM-DD HH:mm:ss')
       if (!task.start) {
+        if (task.startTime && task.startTime.indexOf('pause') > -1) {
+          task.startTime = task.startTime.replace('(pause)', '')
+        }
+        else {
+          let startTime = moment().format('MM-DD HH:mm:ss')
+          task.startTime = startTime
+        }
         task.start = true
-        task.startTime = startTime
         task.timer = setInterval(()=> {
           task.minute = Math.floor(task.counter / 60)
           task.second = task.counter % 60
@@ -283,7 +287,7 @@ export default {
           this.setFail(task)
         }, 1000)
       } else {
-        task.startTime = startTime + '(暂停中)'
+        task.startTime = task.startTime + '(pause)'
         clearInterval(task.timer)
         task.start = false
       }
@@ -364,9 +368,20 @@ export default {
           margin-bottom 10px
           padding-left 10px
           padding-top 10px
-          vertical-align center    
+          vertical-align center   
+          .time-enter-active, .time-leave-active 
+            transition all .5s ease
+          .time-enter,.time-leave-to
+            opacity 0
+          .dot
+            position relative
+            .cubeic-square-border,
+            .cubeic-square-right
+              font-size 24px
+              position absolute
+              top 0
           .content
-            margin-left 10px
+            margin-left 30px
             width 100%
             display flex
             flex-direction column
@@ -427,10 +442,7 @@ export default {
               justify-content space-between
               .button
                 color white
-          .time-enter-active, .time-leave-active 
-            transition all .5s ease
-          .time-enter, .time-leave-to
-            opacity 0
+          
         .done
           background #FFCC99
         .fail
@@ -443,6 +455,7 @@ export default {
           button
             background #999
 
+    
     .footer 
       background #ccc
       width 100%
@@ -451,5 +464,5 @@ export default {
       font-size 60px
       left 50%
       transform translateX(-50%)
-
+    
 </style>
