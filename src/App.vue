@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <router-view></router-view>
+    <transition name='router'>
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 <script>
@@ -18,6 +20,7 @@
     -moz-osx-font-smoothing grayscale
     text-align center
     color #2c3e50
+    height 100%
 @media screen and (min-width: 801px)
   html,body 
     background #ccc
@@ -30,4 +33,12 @@
     -moz-osx-font-smoothing grayscale
     text-align center
     color #2c3e50
+    height 100%
+.router-enter-active, .router-leave-active 
+  transition all 0.5s ease
+.router-enter,.router-leave-to
+  opacity 0
+  position fixed
+  transform translateX(-100%)
+  
 </style>

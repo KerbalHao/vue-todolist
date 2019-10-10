@@ -170,7 +170,7 @@ export default {
   },
   beforeDestroy() {
     this.tasks.forEach(task => {
-      if (task.start === true) {
+      if (task.start) {
         this.manipulateTask(task)
       }
     })
@@ -241,7 +241,11 @@ export default {
     completeTask(task) {
       clearInterval(task.timer)
       if (!task.done) {
-        task.startTime += '(finished)'
+        if (task.startTime.indexOf('pause') > -1) {
+          task.startTime = task.startTime.replace('(pause)', '(finished)') 
+        } else {
+          task.startTime += '(finished)'
+        }
         task.done = true
       } else if (task.done) {
         // 重置
@@ -252,8 +256,11 @@ export default {
       localStorage.setItem('tasks', JSON.stringify(this.tasks))
     },
     editTask(task) {
-      task.start = false
-      clearInterval(task.timer)
+      if(task.start){
+        task.startTime = task.startTime + '(pause)'
+        clearInterval(task.timer)
+        task.start = false
+      }
       this.$router.push({
         name: 'Detail',
         params: {
@@ -337,8 +344,8 @@ export default {
 
 <style lang='stylus' scoped>
   .home
+    height 100%
     .main
-      // margin 100px 10px 10px 10px
       width 95%
       height 100%
       position fixed
@@ -373,6 +380,8 @@ export default {
             transition all .5s ease
           .time-enter,.time-leave-to
             opacity 0
+            font-size 0px
+            transform translateX(100%)
           .dot
             position relative
             .cubeic-square-border,

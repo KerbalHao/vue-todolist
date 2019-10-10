@@ -102,7 +102,7 @@ export default {
     text-align left
     font-size 18px
     li 
-      margin-bottom 40px
+      border-bottom 1px solid black
       display flex
       justify-content  space-between
       background white

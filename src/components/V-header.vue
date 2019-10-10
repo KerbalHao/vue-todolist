@@ -26,10 +26,6 @@
         <i class="cubeic-ok" @click='saveEdit'></i>
       </div>
     </div>
-    <!-- <div class="searchUpper" v-else-if='page === SEARCH'>
-        <i class="cubeic-search"></i>
-        <span>Search</span>
-    </div>-->
     <split :second="page === 'home'" :num='num' :finished='finished'></split>
   </div>
 </template>
@@ -97,7 +93,6 @@ export default {
 
 <style lang='stylus' scoped>
   .header
-    // margin-top 20px
     padding-top 20px
     height 75px
     position relative
