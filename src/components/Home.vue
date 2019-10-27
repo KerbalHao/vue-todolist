@@ -168,15 +168,19 @@ export default {
       }).length
     }
   },
-  beforeDestroy() {
-    this.tasks.forEach(task => {
-      if (task.start) {
-        this.manipulateTask(task)
-      }
+  mounted() {
+    window.addEventListener("beforeunload", () => {
+      this.tasks.forEach(task => {
+        if (task.start) {
+          this.manipulateTask(task)
+        }
+      })
+      localStorage.setItem('tasks', JSON.stringify(this.tasks))
+      localStorage.setItem('aaa', JSON.stringify("zxczxczx"))
     })
-    localStorage.setItem('tasks', JSON.stringify(this.tasks))
   },
   methods: {
+    // 标签跳转
     onChangeTag(tag) {
       switch(tag){
         case 'todo':
@@ -202,6 +206,7 @@ export default {
       this.tag = tag
          
     },
+    // 展示任务详情
     tapTask(task) {
         for (let i = 0; i < this.tasks.length; i ++) {
           if (this.tasks[i] === task) {
@@ -211,9 +216,12 @@ export default {
           }
         }
     },
+    // 选中与否
     toggle(task) {
       task.current = !task.current
     },
+
+    //批量处理
     toggleAll() {
       this.allCheck = !this.allCheck
     },
@@ -238,6 +246,8 @@ export default {
       localStorage.setItem('tasks', JSON.stringify(this.tasks))
       this.allCheck = false
     },
+
+    // 完成任务
     completeTask(task) {
       clearInterval(task.timer)
       if (!task.done) {
@@ -255,7 +265,9 @@ export default {
       }
       localStorage.setItem('tasks', JSON.stringify(this.tasks))
     },
+    // 编辑任务
     editTask(task) {
+      // 暂停所有任务计时
       if(task.start){
         task.startTime = task.startTime + '(pause)'
         clearInterval(task.timer)
@@ -268,6 +280,7 @@ export default {
         }
       })
     },
+    // 删除任务
     deleteTask(task) {
       for (let i = 0; i < this.tasks.length; i++) {
         if (task === this.tasks[i]) {
@@ -276,6 +289,8 @@ export default {
       }
       localStorage.setItem('tasks', JSON.stringify(this.tasks))
     },
+
+    // 任务操作 开始与暂停
     manipulateTask(task) {
       if (!task.start) {
         if (task.startTime && task.startTime.indexOf('pause') > -1) {
@@ -300,11 +315,13 @@ export default {
       }
       localStorage.setItem('tasks', JSON.stringify(this.tasks))
     },
+    // 任务操作 停止
     stopTask(task) {
       clearInterval(task.timer)
       this.reset(task)
       localStorage.setItem('tasks', JSON.stringify(this.tasks))
     },
+
     reset(task) {
       task.done = false
       task.fail = false
